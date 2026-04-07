@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciamento de Clientes</title>
+</head>
+<body>
+<div>
+    <h1>Lista de Clientes</h1>
+    <hr>
+
+    <div style="margin-bottom: 15px;">
+        <form th:action="@{/clientes/novo}" method="GET">
+            <button type="submit">+ Novo Cliente</button>
+        </form>
+    </div>
+
+    <table border="1" style="width: 100%; text-align: left; border-collapse: collapse;">
+        <thead>
+        <tr>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>Data de Nascimento</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="cliente : ${clientes}">
+            <td th:text="${cliente.nome}">João da Silva</td>
+            <td th:text="${cliente.cpf}">000.000.000-00</td>
+            <td th:text="${cliente.dataDeNascimento}">01/01/2000</td>
+            <td>
+                <a th:href="@{/clientes/editar/{id}(id=${cliente.id})}">Editar</a>
+                &nbsp;|&nbsp;
+                <a th:if="${cliente.ativo}" th:href="@{/clientes/inativar/{id}(id=${cliente.id})}">Inativar</a>
+                <a th:unless="${cliente.ativo}" th:href="@{/clientes/ativar/{id}(id=${cliente.id})}">Ativar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${#lists.isEmpty(clientes)}" style="margin-top: 15px;">
+        <p>Nenhum cliente cadastrado no momento.</p>
+    </div>
+
+</div>
+</body>
+</html>
