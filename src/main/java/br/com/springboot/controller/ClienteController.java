@@ -42,7 +42,18 @@ public class ClienteController {
         model.addAttribute("cliente", bo.pesquisaPeloId(id));
         return new ModelAndView("/cliente/formulario", model);
     }
+    @RequestMapping(value = "/ativar/{id}", method = RequestMethod.GET)
+    public String ativar(@PathVariable("id") Long id) {
+        Cliente cliente = bo.pesquisaPeloId(id);
+        bo.ativa(cliente);
+        return "redirect:/clientes";
+    }
 
-
-
+    @RequestMapping(value = "/inativa/{id}", method = RequestMethod.GET)
+    public String inativar(@PathVariable("id") Long id) {
+        Cliente cliente = bo.pesquisaPeloId(id);
+        if (cliente != null) {
+            bo.inativa(cliente); }
+        return "redirect:/clientes";
+    }
 }
