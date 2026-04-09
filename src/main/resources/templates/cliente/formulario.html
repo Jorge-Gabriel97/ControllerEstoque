@@ -6,78 +6,87 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-<body class="bg-light"> <div class="container mt-5 mb-5">
+<body class="bg-light">
+
+<div class="container mt-5 mb-5">
     <div class="row justify-content-center">
-        <div class="col-md-10 col-lg-8"> <div class="card shadow-lg border-0 rounded-4">
+        <div class="col-md-10 col-lg-8">
 
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3 rounded-top-4">
-                <h2 class="mb-0 fs-4">Formulário de Cliente</h2>
-                <a th:href="@{/clientes}" class="btn btn-light text-primary fw-bold shadow-sm px-3">
-                    &larr; Voltar
-                </a>
+            <div class="card shadow-lg border-0 rounded-4">
+
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3 rounded-top-4">
+                    <h2 class="mb-0 fs-4">Formulário de Cliente</h2>
+                    <a th:href="@{/clientes}" class="btn btn-light text-primary fw-bold shadow-sm px-3">
+                        &larr; Voltar
+                    </a>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <form th:action="@{/clientes/salvar}" method="POST" th:object="${cliente}" novalidate>
+
+                        <input type="hidden" th:field="*{id}"/>
+
+                        <div class="mb-3">
+                            <label for="nome" class="form-label fw-bold">Nome Completo</label>
+                            <input type="text" class="form-control" th:field="*{nome}" maxlength="50" placeholder="Ex: João da Silva"/>
+                            <span class="text-danger small fw-bold" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="cpf" class="form-label fw-bold">CPF</label>
+                                <input type="text" class="form-control" th:field="*{cpf}" maxlength="11" placeholder="Apenas números"/>
+                                <span class="text-danger small fw-bold" th:if="${#fields.hasErrors('cpf')}" th:errors="*{cpf}"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="dataDeNascimento" class="form-label fw-bold">Data de Nascimento</label>
+                                <input type="date" class="form-control" th:field="*{dataDeNascimento}"/>
+                                <span class="text-danger small fw-bold" th:if="${#fields.hasErrors('dataDeNascimento')}" th:errors="*{dataDeNascimento}"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="sexo" class="form-label fw-bold">Sexo</label>
+                                <select class="form-select" th:field="*{sexo}">
+                                    <option value="">Selecione...</option>
+                                    <option value="MASCULINO">Masculino</option>
+                                    <option value="FEMININO">Feminino</option>
+                                    <option value="OUTRO">Outro</option>
+                                </select>
+                                <span class="text-danger small fw-bold" th:if="${#fields.hasErrors('sexo')}" th:errors="*{sexo}"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="telefone" class="form-label fw-bold">Telefone Fixo</label>
+                                <input type="tel" class="form-control" th:field="*{telefone}" maxlength="10" placeholder="(00) 0000-0000"/>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="celular" class="form-label fw-bold">Celular</label>
+                                <input type="tel" class="form-control" th:field="*{celular}" maxlength="11" placeholder="(00) 90000-0000"/>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="email" class="form-label fw-bold">E-mail</label>
+                            <input type="email" class="form-control" th:field="*{email}" maxlength="50" placeholder="exemplo@email.com"/>
+                            <span class="text-danger small fw-bold" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                        </div>
+
+                        <div class="form-check form-switch mb-5">
+                            <input class="form-check-input fs-5" type="checkbox" role="switch" id="ativo" th:field="*{ativo}">
+                            <label class="form-check-label fw-bold ms-2 mt-1" for="ativo">Cliente Ativo no Sistema</label>
+                        </div>
+
+                        <hr class="text-muted">
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a th:href="@{/clientes}" class="btn btn-outline-secondary px-4">Cancelar</a>
+                            <button type="submit" class="btn btn-primary px-5 shadow-sm">Salvar Cliente</button>
+                        </div>
+
+                    </form>
+                </div>
             </div>
-
-            <div class="card-body p-4 p-md-5">
-                <form th:action="@{/clientes/salvar}" method="POST" th:object="${cliente}">
-
-                    <input type="hidden" th:field="*{id}"/>
-
-                    <div class="mb-3">
-                        <label for="nome" class="form-label fw-bold">Nome Completo</label>
-                        <input type="text" class="form-control" th:field="*{nome}" maxlength="50" placeholder="Ex: João da Silva" required/>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="cpf" class="form-label fw-bold">CPF</label>
-                            <input type="text" class="form-control" th:field="*{cpf}" maxlength="11" placeholder="Apenas números"/>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="dataDeNascimento" class="form-label fw-bold">Data de Nascimento</label>
-                            <input type="date" class="form-control" th:field="*{dataDeNascimento}"/>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="sexo" class="form-label fw-bold">Sexo</label>
-                            <select class="form-select" th:field="*{sexo}">
-                                <option value="">Selecione...</option>
-                                <option value="MASCULINO">Masculino</option>
-                                <option value="FEMININO">Feminino</option>
-                                <option value="OUTRO">Outro</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="telefone" class="form-label fw-bold">Telefone Fixo</label>
-                            <input type="tel" class="form-control" th:field="*{telefone}" maxlength="10" placeholder="(00) 0000-0000"/>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="celular" class="form-label fw-bold">Celular</label>
-                            <input type="tel" class="form-control" th:field="*{celular}" maxlength="11" placeholder="(00) 90000-0000"/>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="email" class="form-label fw-bold">E-mail</label>
-                        <input type="email" class="form-control" th:field="*{email}" maxlength="50" placeholder="exemplo@email.com"/>
-                    </div>
-
-                    <div class="form-check form-switch mb-5">
-                        <input class="form-check-input fs-5" type="checkbox" role="switch" id="ativo" th:field="*{ativo}">
-                        <label class="form-check-label fw-bold ms-2 mt-1" for="ativo">Cliente Ativo no Sistema</label>
-                    </div>
-
-                    <hr class="text-muted">
-
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                        <a th:href="@{/clientes}" class="btn btn-outline-secondary px-4">Cancelar</a>
-                        <button type="submit" class="btn btn-primary px-5 shadow-sm">Salvar Cliente</button>
-                    </div>
-
-                </form>
-            </div>
-        </div>
 
         </div>
     </div>
