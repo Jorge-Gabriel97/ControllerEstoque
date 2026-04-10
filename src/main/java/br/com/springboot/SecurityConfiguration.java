@@ -2,6 +2,7 @@ package br.com.springboot;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -10,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+
 
 @Configuration
 @EnableWebSecurity
@@ -21,37 +23,48 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**", "/img/**").permitAll() // Libera recursos visuais
-                        .anyRequest().authenticated() // Bloqueia todo o resto
-                )
-                .formLogin(form -> form
-                        .defaultSuccessUrl("/", true) // Vai para o index após logar
-                        .permitAll()
-                )
-                .logout(logout -> logout.permitAll());
+    public UserDetailsService userDetailsService() {
+        UserDetails admin = User.builder()
+                .username("admin")
+                .password(passwordEncoder().encode("12345"))
+                .roles("Administrador")
+                .build();
 
-        return http.build();
+        UserDetails user = User.builder()
+                .username("user")
+                .password(passwordEncoder().encode("12345"))
+                .roles("Gerente")
+                .build();
+
+        return new InMemoryUserDetailsManager(admin, user);
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        // Criando usuários em memória para teste local
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
 
-        UserDetails admin = User.builder()
-                .username("jorge")
-                .password(passwordEncoder().encode("admin123"))
-                .roles("DONO")
-                .build();
 
-        UserDetails funcionario = User.builder()
-                .username("funcionario")
-                .password(passwordEncoder().encode("123"))
-                .roles("FUNCIONARIO")
-                .build();
+                        .requestMatchers(HttpMethod.GET, "/nota-entrada").hasRole("Administrador")
+                        .requestMatchers(HttpMethod.GET, "/nota-saida").hasRole("Administrador")
+                        .requestMatchers(HttpMethod.GET, "/estoque").hasRole("Administrador")
 
-        return new InMemoryUserDetailsManager(admin, funcionario);
+
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                         .loginPage("/login")
+                        .defaultSuccessUrl("/", true)
+                        .permitAll()
+                )
+                .logout(logout -> logout
+
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .permitAll()
+                );
+
+        return http.build();
     }
 }
