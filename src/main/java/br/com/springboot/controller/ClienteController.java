@@ -7,10 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/clientes")
@@ -20,44 +19,55 @@ public class ClienteController {
     private ClienteBo bo;
 
     @RequestMapping(value = "/novo", method = RequestMethod.GET)
-    public ModelAndView novo(ModelMap model){
+    public ModelAndView novo(ModelMap model) {
         model.addAttribute("cliente", new Cliente());
         return new ModelAndView("/cliente/formulario", model);
     }
 
 
-    @RequestMapping(value = "/salvar", method = RequestMethod.POST)
-    public String salvar(@Valid Cliente cliente, BindingResult result) {
-        if (result.hasErrors())
+    @PostMapping("/salvar")
+    public String salvar(@Valid Cliente cliente, BindingResult result, RedirectAttributes attr) {
+        if (result.hasErrors()) {
             return "cliente/formulario";
+        }
+        String mensagemDeSucesso = (cliente.getId() == null)
+                ? "Cliente cadastrado com sucesso!"
+                : "Cliente atualizado com sucesso!";
         bo.insere(cliente);
-        return "redirect:/clientes/novo";
+        attr.addFlashAttribute("feedback", mensagemDeSucesso);
+        return "redirect:/clientes";
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET)
-    public ModelAndView lista(ModelMap model){
+    @GetMapping("")
+    public ModelAndView lista(ModelMap model) {
         model.addAttribute("clientes", bo.lista());
         return new ModelAndView("/cliente/lista", model);
     }
-    @RequestMapping(value = "/editar/{id}", method = RequestMethod.GET)
+
+    @GetMapping("/editar/{id}")
     public ModelAndView edita(@PathVariable("id") Long id) {
-        Cliente cliente = bo.pesquisaPeloId(id);
         ModelMap model = new ModelMap();
         model.addAttribute("cliente", bo.pesquisaPeloId(id));
         return new ModelAndView("/cliente/formulario", model);
     }
-    @RequestMapping(value = "/ativar/{id}", method = RequestMethod.GET)
-    public String ativar(@PathVariable("id") Long id) {
+
+    @GetMapping("/ativar/{id}")
+    public String ativar(@PathVariable("id") Long id, RedirectAttributes attr) {
         Cliente cliente = bo.pesquisaPeloId(id);
-        bo.ativa(cliente);
+        if (cliente != null) {
+            bo.ativa(cliente);
+            attr.addFlashAttribute("feedback", "Cliente ativado com sucesso!");
+        }
         return "redirect:/clientes";
     }
 
-    @RequestMapping(value = "/inativa/{id}", method = RequestMethod.GET)
-    public String inativar(@PathVariable("id") Long id) {
+    @GetMapping("/inativa/{id}")
+    public String inativar(@PathVariable("id") Long id, RedirectAttributes attr) {
         Cliente cliente = bo.pesquisaPeloId(id);
         if (cliente != null) {
-            bo.inativa(cliente); }
+            bo.inativa(cliente);
+            attr.addFlashAttribute("feedback", "Cliente inativado com sucesso!");
+        }
         return "redirect:/clientes";
     }
 }

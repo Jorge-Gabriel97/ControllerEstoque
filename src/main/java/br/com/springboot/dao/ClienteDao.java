@@ -26,7 +26,11 @@ public class ClienteDao implements CRUD<Cliente, Long> {
 
     @Override
     public void insere(Cliente cliente) {
-        entityManagerger.persist(cliente);
+        if (cliente.getId() == null) {
+            entityManagerger.persist(cliente);
+        } else {
+            entityManagerger.merge(cliente);
+        }
     }
 
     @Override

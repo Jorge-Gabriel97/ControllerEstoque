@@ -35,7 +35,7 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="cpf" class="form-label fw-bold">CPF</label>
-                                <input type="text" class="form-control" th:field="*{cpf}" maxlength="11" placeholder="Apenas números"/>
+                                <input type="text" class="form-control" th:field="*{cpf}" maxlength="14" placeholder="Apenas números"/>
                                 <span class="text-danger small fw-bold" th:if="${#fields.hasErrors('cpf')}" th:errors="*{cpf}"></span>
                             </div>
                             <div class="col-md-6 mb-3">
@@ -58,11 +58,11 @@
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="telefone" class="form-label fw-bold">Telefone Fixo</label>
-                                <input type="tel" class="form-control" th:field="*{telefone}" maxlength="10" placeholder="(00) 0000-0000"/>
+                                <input type="tel" class="form-control" th:field="*{telefone}" maxlength="15" placeholder="(00) 0000-0000"/>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="celular" class="form-label fw-bold">Celular</label>
-                                <input type="tel" class="form-control" th:field="*{celular}" maxlength="11" placeholder="(00) 90000-0000"/>
+                                <input type="tel" class="form-control" th:field="*{celular}" maxlength="15" placeholder="(00) 90000-0000"/>
                             </div>
                         </div>
 
@@ -91,6 +91,16 @@
         </div>
     </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.maskedinput/1.4.1/jquery.maskedinput.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function (){
+        $("#cpf").mask("999.999.999-99");
+        $("#telefone").mask("(99) 9999-9999");
+        $("#celular").mask("(99) 99999-9999");
+    });
+</script>
 
 </body>
 </html>

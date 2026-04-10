@@ -22,7 +22,7 @@ public class Cliente {
     @NotBlank(message = "Informe seu Nome")
     @Size(min = 3, max = 50)
     private String nome;
-    @Column(length = 11)
+    @Column(length = 14)
     @CPF(message = "CPF inválido")
     private String cpf;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -32,9 +32,9 @@ public class Cliente {
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Informe o sexo")
     private Sexo sexo;
-    @Column(length = 10)
+    @Column(length = 15)
     private String telefone;
-    @Column(length = 11)
+    @Column(length = 15)
     private String celular;
     @Column(length = 50)
     @Email()
