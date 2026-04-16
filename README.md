@@ -2,46 +2,52 @@
 
 > 🚧 **Status do Projeto:** Em desenvolvimento (WIP - Work in Progress) 🚧
 
-Um sistema de gerenciamento de estoque focado em facilitar o controle de entradas, saídas e monitoramento de produtos. Este projeto está sendo construído gradativamente e receberá novas funcionalidades com o tempo.
+Um sistema de gerenciamento de estoque focado em facilitar o controle de entradas, saídas e monitoramento de produtos. Este projeto aplica padrões de arquitetura corporativa e segurança robusta para garantir a integridade dos dados.
 
 ## 🎯 Objetivo
-Prover uma solução simples e eficiente para gestão de inventário, garantindo que o controle de produtos seja fluido e organizado.
+Prover uma solução eficiente para gestão de inventário, utilizando uma arquitetura desacoplada que facilita a manutenção e escala do sistema.
 
-## 🚀 Funcionalidades Planejadas / Em Implementação
-- [x] Estruturação inicial do projeto
-- [x] Cadastro e Gestão de Clientes (Salvar, Editar, Listar, Ativar/Inativar)
-- [ ] Cadastro de produtos (Nome, Categoria, Preço, Quantidade)
-- [ ] Registro de movimentações (Entradas e Saídas)
-- [ ] Alertas de estoque baixo
-- [ ] Relatórios de movimentação
+## 🚀 Funcionalidades Implementadas
+- [x] **Segurança:** Autenticação e Autorização com **Spring Security 6**.
+- [x] **Interface Customizada:** Tela de login estilizada e feedback de acesso negado/logout.
+- [x] **Gestão de Clientes:** CRUD completo com validações e máscaras.
+- [x] **Gestão de Fornecedores:** CRUD completo (Nome Fantasia, Razão Social, CNPJ).
+- [x] **Componentização:** Navegação global via **Thymeleaf Fragments**.
+- [x] **Testes Automatizados:** Testes de integração para camadas de negócio (BO).
 
-## 📈 Progressão Atual
-A primeira fase do desenvolvimento focou na estruturação da base de clientes do sistema, implementando:
-* CRUD completo da entidade `Cliente` utilizando Spring MVC.
-* Interface responsiva com **Thymeleaf** e **Bootstrap 5**.
-* Implementação de máscaras de formatação no front-end utilizando **jQuery Mask** (CPF, Telefone, Celular).
-* Validação de dados robusta no backend com **Jakarta Validation** (`@CPF`, `@Email`, `@NotBlank`).
-* Sistema de feedback visual dinâmico com **Flash Attributes** para confirmar ações do usuário de forma amigável.
+## 📈 Progressão e Arquitetura
+O desenvolvimento evoluiu para uma estrutura **MVC + BO/DAO**, garantindo que as regras de negócio fiquem isoladas da persistência:
 
-## 🐛 Erros Enfrentados e Soluções
-Durante o desenvolvimento, a metodologia de depuração aplicada foi a **"Follow the Data Flow"** (Seguir o Fluxo de Dados), garantindo a integridade da informação de ponta a ponta:
+* **Camada de Segurança:** Implementação de `SecurityFilterChain` com proteção CSRF e controle de rotas por perfis (Administrador/Gerente).
+* **Módulo de Fornecedores:** Criação completa seguindo o fluxo de dados:
+  * `FornecedorModel`: Validação rigorosa com `@CNPJ` e `@NotBlank`.
+  * `FornecedorBo`: Lógica de ativação/inativação e regras de negócio.
+  * `FornecedorDao`: Persistência via `EntityManager` (JPA/Hibernate).
+* **UX/UI:** Padronização visual com uma **Navbar Global** injetada em todas as páginas, reduzindo a duplicidade de código e facilitando atualizações de menu.
 
-* **Data Truncation (Conflito de Tamanho de Coluna):** * *Problema:* A aplicação lançava exceção ao salvar (`Data too long for column`) pois o jQuery Mask enviava os dados com formatação (parênteses e traços, ex: 14/15 caracteres), mas o banco e a classe Java esperavam apenas os números (11 caracteres).
-   * *Solução:* Alinhamento de todos os pontos do fluxo de dados: HTML (`maxlength="15"`), Java (`@Column(length = 15)`) e Banco de Dados (`ALTER TABLE MODIFY VARCHAR(15)`).
-* **Detached entity passed to persist (Hibernate):** * *Problema:* Erro ao tentar editar um registro existente. O sistema tentava utilizar o comando `persist` do JPA em uma entidade que já possuía um ID no banco de dados.
-   * *Solução:* Refatoração da classe DAO para diferenciar criação de atualização. Implementação de lógica condicional: se o ID for `null`, utiliza `entityManager.persist()` (novo cadastro); caso contrário, utiliza `entityManager.merge()` (edição).
-* **Sintaxe de Banco de Dados (Erros 1064 e 1049):** * *Problema:* Falhas ao tentar selecionar o banco de dados devido a espaços no nome e divergência de nomenclatura.
-   * *Solução:* Padronização do nome do *schema* para `estoque` (sem espaços) e execução correta do comando `USE estoque;`.
-* **Gerenciamento de Mensagens Flash:**
-   * *Problema:* Mensagens de sucesso de edição aparecendo antes do formulário ser enviado (ações GET).
-   * *Solução:* Isolamento do `RedirectAttributes` estritamente para os métodos `@PostMapping` e ações concretas (como Inativar/Ativar), garantindo que o alerta de sucesso surja apenas após a persistência bem-sucedida.
+## 🐛 Erros Enfrentados e Soluções (Metodologia FTDF)
+Aplicando o **"Follow the Data Flow"**, resolvemos desafios críticos nesta etapa:
+
+* **Migração para Spring Security 6:**
+  * *Problema:* Erros de compilação em `@Override configure` e `antMatchers` (obsoletos).
+  * *Solução:* Refatoração para o padrão **Lambda DSL** e uso de `SecurityFilterChain` com `requestMatchers`, adotando a abordagem baseada em componentes (Beans).
+* **Resolução de Templates (Erro 500):**
+  * *Problema:* Exceções de "Error resolving template" ao tentar acessar o módulo de fornecedores.
+  * *Solução:* Correção da estrutura física de pastas na IDE (movendo a pasta `fornecedor` para a raiz de `templates`) e remoção de barras iniciais redundantes nos retornos dos Controllers.
+* **Consistência de Rotas (Erro 404):**
+  * *Problema:* Links da Navbar apontando para URLs no plural enquanto os Controllers escutavam no singular.
+  * *Solução:* Padronização total de endpoints para o plural (`/fornecedores`), mantendo a semântica de coleções de recursos.
+* **Segurança no Logout:**
+  * *Problema:* Botão de sair não funcionava apenas com link simples.
+  * *Solução:* Implementação de formulário `POST` com CSRF token, conforme exigência do Spring Security para evitar ataques de encerramento de sessão não autorizado.
 
 ## 🛠️ Tecnologias Utilizadas
 
-- **Linguagem:** Java / JavaScript
-- **Framework:** Spring Boot
-- **Banco de Dados:** MySQL
-- **Front-end:** Thymeleaf, Bootstrap 5, jQuery
+- **Linguagem:** Java / JavaScript (jQuery)
+- **Framework:** Spring Boot 4.x / Spring Security 6
+- **Banco de Dados:** MySQL 8.0
+- **Front-end:** Thymeleaf, Bootstrap 5.3, Bootstrap Icons
+- **Testes:** JUnit 5, Mockito
 
 ## ⚙️ Como executar o projeto localmente
 
