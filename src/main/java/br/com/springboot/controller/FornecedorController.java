@@ -12,17 +12,23 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/fornecedor")
+@RequestMapping("/fornecedores") // Escutando no plural
 public class FornecedorController {
 
     @Autowired
     private FornecedorBo bo;
 
+    @GetMapping
+    public ModelAndView lista(ModelMap model) {
+        model.addAttribute("fornecedores", bo.lista());
+
+        return new ModelAndView("fornecedor/lista", model);
+    }
 
     @GetMapping("/novo")
     public ModelAndView novo(ModelMap model) {
         model.addAttribute("fornecedor", new Fornecedor());
-        return new ModelAndView("/fornecedor/formulario", model);
+        return new ModelAndView("fornecedor/formulario", model);
     }
 
     @PostMapping("/salvar")
@@ -35,20 +41,14 @@ public class FornecedorController {
                 : "Fornecedor atualizado com sucesso!";
         bo.insere(fornecedor);
         attr.addFlashAttribute("feedback", mensagemDeSucesso);
-        return "redirect:/fornecedor";
-    }
-
-    @GetMapping("")
-    public ModelAndView lista(ModelMap model) {
-        model.addAttribute("fornecedor", bo.lista());
-        return new ModelAndView("/fornecedor/lista", model);
+        return "redirect:/fornecedores";
     }
 
     @GetMapping("/editar/{id}")
     public ModelAndView edita(@PathVariable("id") Long id) {
         ModelMap model = new ModelMap();
         model.addAttribute("fornecedor", bo.pesquisaPeloId(id));
-        return new ModelAndView("/fornecedor/formulario", model);
+        return new ModelAndView("fornecedor/formulario", model);
     }
 
     @GetMapping("/ativar/{id}")
@@ -58,7 +58,7 @@ public class FornecedorController {
             bo.ativa(fornecedor);
             attr.addFlashAttribute("feedback", "Fornecedor ativado com sucesso!");
         }
-        return "redirect:/fornecedor";
+        return "redirect:/fornecedores";
     }
 
     @GetMapping("/inativa/{id}")
@@ -68,6 +68,6 @@ public class FornecedorController {
             bo.inativa(fornecedor);
             attr.addFlashAttribute("feedback", "Fornecedor inativado com sucesso!");
         }
-        return "redirect:/fornecedor";
+        return "redirect:/fornecedores";
     }
 }

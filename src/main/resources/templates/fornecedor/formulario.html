@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Fornecedor - Estoque</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body class="bg-light">
+
+<div th:replace="~{fragments/navbar :: menu_principal}"></div>
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+
+            <div class="card shadow-lg border-0 rounded-4">
+
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3 rounded-top-4">
+                    <h2 class="mb-0 fs-4">Formulário de Fornecedor</h2>
+                    <a th:href="@{/fornecedores}" class="btn btn-light text-primary fw-bold shadow-sm px-3">
+                        &larr; Voltar
+                    </a>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <form th:action="@{/fornecedores/salvar}" method="POST" th:object="${fornecedor}" novalidate>
+
+                        <input type="hidden" th:field="*{id}"/>
+
+                        <div class="mb-3">
+                            <label for="nomeFantasia" class="form-label fw-bold">Nome Fantasia</label>
+                            <input type="text" class="form-control" th:field="*{nomeFantasia}" maxlength="100" placeholder="Ex: Distribuidora XPTO"/>
+                            <span class="text-danger small fw-bold" th:if="${#fields.hasErrors('nomeFantasia')}" th:errors="*{nomeFantasia}"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="razaoSocial" class="form-label fw-bold">Razão Social</label>
+                            <input type="text" class="form-control" th:field="*{razaoSocial}" maxlength="100" placeholder="Ex: XPTO Comércio e Distribuição LTDA"/>
+                            <span class="text-danger small fw-bold" th:if="${#fields.hasErrors('razaoSocial')}" th:errors="*{razaoSocial}"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="cnpj" class="form-label fw-bold">CNPJ</label>
+                                <input type="text" class="form-control" th:field="*{cnpj}" maxlength="18" placeholder="00.000.000/0001-00"/>
+                                <span class="text-danger small fw-bold" th:if="${#fields.hasErrors('cnpj')}" th:errors="*{cnpj}"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="celular" class="form-label fw-bold">Celular / WhatsApp</label>
+                                <input type="tel" class="form-control" th:field="*{celular}" maxlength="15" placeholder="(00) 90000-0000"/>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="email" class="form-label fw-bold">E-mail Comercial</label>
+                            <input type="email" class="form-control" th:field="*{email}" maxlength="100" placeholder="contato@empresa.com.br"/>
+                            <span class="text-danger small fw-bold" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                        </div>
+
+                        <div class="form-check form-switch mb-5">
+                            <input class="form-check-input fs-5" type="checkbox" role="switch" id="ativo" th:field="*{ativo}">
+                            <label class="form-check-label fw-bold ms-2 mt-1" for="ativo">Fornecedor Ativo no Sistema</label>
+                        </div>
+
+                        <hr class="text-muted">
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a th:href="@{/fornecedores}" class="btn btn-outline-secondary px-4">Cancelar</a>
+                            <button type="submit" class="btn btn-primary px-5 shadow-sm">Salvar Fornecedor</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.maskedinput/1.4.1/jquery.maskedinput.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function (){
+        $("#cnpj").mask("99.999.999/9999-99");
+        $("#celular").mask("(99) 99999-9999");
+    });
+</script>
+
+</body>
+</html>
