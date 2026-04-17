@@ -1,6 +1,7 @@
 package br.com.springboot.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -22,12 +23,19 @@ public class Produto {
     @NotNull(message = "Selecione uma categoria")
     private Categoria categoria;
 
+
+    @Column(nullable = false)
+    @NotNull(message = "Informe a quantidade")
+    @Min(value = 0, message = "A quantidade não pode ser negativa")
+    private Integer quantidade;
+
     private boolean ativo;
 
-
+    // Construtor vazio
     public Produto() {
     }
 
+    // --- GETTERS E SETTERS ---
 
     public Long getId() {
         return id;
@@ -51,6 +59,15 @@ public class Produto {
 
     public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
+    }
+
+
+    public Integer getQuantidade() {
+        return quantidade;
+    }
+
+    public void setQuantidade(Integer quantidade) {
+        this.quantidade = quantidade;
     }
 
     public boolean isAtivo() {

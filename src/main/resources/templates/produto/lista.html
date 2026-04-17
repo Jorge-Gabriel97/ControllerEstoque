@@ -35,17 +35,23 @@
                         <th>Nome do Produto</th>
                         <th>Categoria</th>
                         <th>Status</th>
+                        <th>Qtd.</th>
                         <th class="text-center">Ações</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr th:each="produto : ${produtos}">
                         <td class="fw-bold text-secondary" th:text="${produto.nome}">Nome Produto</td>
+
                         <td th:text="${produto.categoria.descricao}">Categoria</td>
+
                         <td>
                             <span class="badge bg-success rounded-pill" th:if="${produto.ativo}">Ativo</span>
                             <span class="badge bg-secondary rounded-pill" th:unless="${produto.ativo}">Inativo</span>
                         </td>
+
+                        <td class="text-center" th:text="${produto.quantidade}">0</td>
+
                         <td class="text-center">
                             <a th:href="@{/produtos/editar/{id}(id=${produto.id})}" class="btn btn-sm btn-outline-primary">Editar</a>
                             <a th:if="${produto.ativo}" th:href="@{/produtos/inativa/{id}(id=${produto.id})}" class="btn btn-sm btn-outline-danger ms-1">Inativar</a>

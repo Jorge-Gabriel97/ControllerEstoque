@@ -45,6 +45,12 @@
                             <span class="text-danger small fw-bold" th:if="${#fields.hasErrors('categoria')}" th:errors="*{categoria}"></span>
                         </div>
 
+                        <div class="mb-4">
+                            <label for="quantidade" class="form-label fw-bold">Quantidade em Estoque</label>
+                            <input type="number" class="form-control" th:field="*{quantidade}" min="0" placeholder="Ex: 50"/>
+                            <span class="text-danger small fw-bold" th:if="${#fields.hasErrors('quantidade')}" th:errors="*{quantidade}"></span>
+                        </div>
+
                         <div class="form-check form-switch mb-5">
                             <input class="form-check-input fs-5" type="checkbox" role="switch" id="ativo" th:field="*{ativo}">
                             <label class="form-check-label fw-bold ms-2 mt-1" for="ativo">Produto Ativo para Movimentação</label>

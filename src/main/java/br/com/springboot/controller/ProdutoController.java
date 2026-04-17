@@ -35,12 +35,15 @@ public class ProdutoController {
     @PostMapping("/salvar")
     public String salvar(@Valid Produto produto, BindingResult result, RedirectAttributes attr, ModelMap model) {
         if (result.hasErrors()) {
-            model.addAttribute("categorias", Categoria.values()); // Devolve as categorias se der erro
-            return "produto/formulario";
+            model.addAttribute("categorias", Categoria.values());
+            return "produto/formulario"; // Ele devolve a tela se algo estiver errado!
         }
+
+
         String mensagemDeSucesso = (produto.getId() == null)
                 ? "Produto cadastrado com sucesso!"
                 : "Produto atualizado com sucesso!";
+
         bo.insere(produto);
         attr.addFlashAttribute("feedback", mensagemDeSucesso);
         return "redirect:/produtos";
