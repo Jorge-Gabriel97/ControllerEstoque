@@ -2,48 +2,46 @@
 
 > 🚧 **Status do Projeto:** Em desenvolvimento (WIP - Work in Progress) 🚧
 
-Um sistema de gerenciamento de estoque focado em facilitar o controle de entradas, saídas e monitoramento de produtos. Este projeto aplica padrões de arquitetura corporativa e segurança robusta para garantir a integridade dos dados.
+Um sistema de gerenciamento de estoque focado em facilitar o controle de entradas, saídas e monitoramento de produtos. Este projeto aplica padrões de arquitetura corporativa, segurança robusta e boas práticas de proteção de dados.
 
 ## 🎯 Objetivo
 Prover uma solução eficiente para gestão de inventário, utilizando uma arquitetura desacoplada que facilita a manutenção e escala do sistema.
 
 ## 🚀 Funcionalidades Implementadas
-- [x] **Segurança:** Autenticação e Autorização com **Spring Security 6**.
-- [x] **Interface Customizada:** Tela de login estilizada e feedback de acesso negado/logout.
+- [x] **Segurança de Credenciais:** Uso de **Variáveis de Ambiente** para ocultar senhas de banco de dados e ADMIN.
+- [x] **Segurança de Acesso:** Autenticação e Autorização com **Spring Security 6**.
+- [x] **Gestão de Produtos:** CRUD completo com controle de **Quantidade**, Categorias via **Enum** e validação de estoque.
 - [x] **Gestão de Clientes:** CRUD completo com validações e máscaras.
 - [x] **Gestão de Fornecedores:** CRUD completo (Nome Fantasia, Razão Social, CNPJ).
 - [x] **Componentização:** Navegação global via **Thymeleaf Fragments**.
-- [x] **Testes Automatizados:** Testes de integração para camadas de negócio (BO).
+- [x] **Testes Automatizados:** Testes de integração para camadas de negócio (BO) com JUnit 5.
 
 ## 📈 Progressão e Arquitetura
-O desenvolvimento evoluiu para uma estrutura **MVC + BO/DAO**, garantindo que as regras de negócio fiquem isoladas da persistência:
+O projeto segue a estrutura **MVC + BO/DAO**, garantindo que as regras de negócio fiquem isoladas da persistência:
 
-* **Camada de Segurança:** Implementação de `SecurityFilterChain` com proteção CSRF e controle de rotas por perfis (Administrador/Gerente).
-* **Módulo de Fornecedores:** Criação completa seguindo o fluxo de dados:
-  * `FornecedorModel`: Validação rigorosa com `@CNPJ` e `@NotBlank`.
-  * `FornecedorBo`: Lógica de ativação/inativação e regras de negócio.
-  * `FornecedorDao`: Persistência via `EntityManager` (JPA/Hibernate).
-* **UX/UI:** Padronização visual com uma **Navbar Global** injetada em todas as páginas, reduzindo a duplicidade de código e facilitando atualizações de menu.
+* **Módulo de Produtos:** Implementação baseada em UML, integrando campos de `Quantidade` e `Categoria` (CELULARES, ELETRODOMESTICO, INFORMATICA, MOVEIS).
+* **Camada de Dados:** Uso de `Integer` para quantidades com validação `@Min(0)` para evitar estoques negativos.
+* **Segurança Profissional:** Migração de senhas "hardcoded" no `application.properties` para variáveis de ambiente `${DB_PASS}`, garantindo que credenciais sensíveis não sejam versionadas no GitHub.
 
 ## 🐛 Erros Enfrentados e Soluções (Metodologia FTDF)
 Aplicando o **"Follow the Data Flow"**, resolvemos desafios críticos nesta etapa:
 
-* **Migração para Spring Security 6:**
-  * *Problema:* Erros de compilação em `@Override configure` e `antMatchers` (obsoletos).
-  * *Solução:* Refatoração para o padrão **Lambda DSL** e uso de `SecurityFilterChain` com `requestMatchers`, adotando a abordagem baseada em componentes (Beans).
-* **Resolução de Templates (Erro 500):**
-  * *Problema:* Exceções de "Error resolving template" ao tentar acessar o módulo de fornecedores.
-  * *Solução:* Correção da estrutura física de pastas na IDE (movendo a pasta `fornecedor` para a raiz de `templates`) e remoção de barras iniciais redundantes nos retornos dos Controllers.
-* **Consistência de Rotas (Erro 404):**
-  * *Problema:* Links da Navbar apontando para URLs no plural enquanto os Controllers escutavam no singular.
-  * *Solução:* Padronização total de endpoints para o plural (`/fornecedores`), mantendo a semântica de coleções de recursos.
-* **Segurança no Logout:**
-  * *Problema:* Botão de sair não funcionava apenas com link simples.
-  * *Solução:* Implementação de formulário `POST` com CSRF token, conforme exigência do Spring Security para evitar ataques de encerramento de sessão não autorizado.
+* **Property 'quantidade' not found (Thymeleaf Erro 500):**
+  * *Problema:* O HTML não conseguia renderizar o campo de quantidade mesmo após a criação do atributo na classe Java.
+  * *Solução:* Verificação do fluxo de compilação. Além da criação dos **Getters e Setters**, foi necessário realizar um **Rebuild Project** no IntelliJ para que o servidor reconhecesse a nova estrutura da classe `Produto`.
+* **Identifier Expected / Statements outside methods:**
+  * *Problema:* Erro de sintaxe Java impedindo a execução do projeto.
+  * *Solução:* Identificação de chaves `{ }` fechadas incorretamente no `ProdutoController`. A chave do método `@PostMapping` estava fechando antes do comando `bo.insere()`, deixando o código "solto" dentro da classe.
+* **Conflitos de Merge no Git:**
+  * *Problema:* Divergência de código no `application.properties` após um `git pull`.
+  * *Solução:* Resolução manual dos marcadores de conflito (`<<<<<<<`, `=======`) e finalização do processo via terminal, garantindo a integridade das configurações locais.
+* **Credenciais Expostas:**
+  * *Problema:* Senha do banco de dados visível no código-fonte.
+  * *Solução:* Implementação de **Environment Variables** no IntelliJ, mantendo o arquivo de propriedades limpo e seguro para distribuição.
 
 ## 🛠️ Tecnologias Utilizadas
 
-- **Linguagem:** Java / JavaScript (jQuery)
+- **Linguagem:** Java 25 / JavaScript (jQuery)
 - **Framework:** Spring Boot 4.x / Spring Security 6
 - **Banco de Dados:** MySQL 8.0
 - **Front-end:** Thymeleaf, Bootstrap 5.3, Bootstrap Icons
