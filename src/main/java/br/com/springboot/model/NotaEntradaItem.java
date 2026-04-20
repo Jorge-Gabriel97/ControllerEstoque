@@ -17,12 +17,14 @@ public class NotaEntradaItem {
     @Min(value = 1, message = "A quantidade deve ser de no mínimo 1")
     private Integer quantidade;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false)
     @NotNull(message = "Informe o valor unitário")
     @Min(value = 0, message = "O valor unitário não pode ser negativo")
     private Float valorUnitario;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false)
+    @NotNull(message = "Informe o valor unitário")
+    @Min(value = 0, message = "O valor unitário não pode ser negativo")
     private Float valorTotal;
 
     @ManyToOne(fetch = FetchType.LAZY)
