@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Nova Nota de Entrada - Estoque</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        /* Estilo para a tabela de itens parecer um "recibo" */
+        .table-itens th, .table-itens td {
+            vertical-align: middle;
+        }
+        .total-destaque {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #198754; /* Verde sucesso */
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<div th:replace="~{fragments/navbar :: menu_principal}"></div>
+
+<div class="container mt-5 mb-5">
+    <div class="card shadow-lg border-0 rounded-4">
+
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3 rounded-top-4">
+            <h2 class="mb-0 fs-4">Nova Nota de Entrada</h2>
+            <a th:href="@{/notas-entrada}" class="btn btn-light text-primary fw-bold shadow-sm px-3">
+                &larr; Voltar
+            </a>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+            <form id="formNotaEntrada">
+
+                <h4 class="mb-3 text-secondary border-bottom pb-2"><i class="bi bi-truck me-2"></i>Dados do Fornecedor</h4>
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <label for="fornecedor" class="form-label fw-bold">Selecione o Fornecedor</label>
+                        <select class="form-select" id="fornecedor" required>
+                            <option value="">Selecione...</option>
+                            <option th:each="f : ${fornecedores}"
+                                    th:value="${f.id}"
+                                    th:text="${f.razaoSocial} + ' (' + ${f.cnpj} + ')'"></option>
+                        </select>
+                        <div class="invalid-feedback">Por favor, selecione um fornecedor.</div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2 mt-5">
+                    <h4 class="mb-0 text-secondary"><i class="bi bi-box-seam me-2"></i>Itens da Nota</h4>
+                    <button type="button" class="btn btn-sm btn-success shadow-sm" id="btnAdicionarItem">
+                        <i class="bi bi-plus-lg me-1"></i> Adicionar Produto
+                    </button>
+                </div>
+
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered table-hover table-itens" id="tabelaItens">
+                        <thead class="table-light">
+                        <tr>
+                            <th width="40%">Produto</th>
+                            <th width="20%">Quantidade</th>
+                            <th width="20%">Valor Unit. (R$)</th>
+                            <th width="15%">Total (R$)</th>
+                            <th width="5%" class="text-center">Ações</th>
+                        </tr>
+                        </thead>
+                        <tbody id="listaItens">
+                        </tbody>
+                        <tfoot>
+                        <tr class="table-light">
+                            <td colspan="3" class="text-end fw-bold fs-5 align-middle">TOTAL DA NOTA:</td>
+                            <td colspan="2" class="text-start total-destaque">
+                                R$ <span id="valorTotalNota">0.00</span>
+                            </td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="alert alert-danger d-none shadow-sm" id="alertaErro" role="alert"></div>
+
+                <hr class="text-muted mt-5">
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <button type="button" class="btn btn-outline-secondary px-4" onclick="window.location.reload();">Limpar</button>
+                    <button type="submit" class="btn btn-primary px-5 shadow-sm" id="btnSalvarNota">
+                        <i class="bi bi-check-circle me-1"></i> Gravar Nota de Entrada
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<table class="d-none">
+    <tbody id="templateLinha">
+    <tr class="linha-item">
+        <td>
+            <select class="form-select select-produto" required>
+                <option value="">Selecione o produto...</option>
+                <option th:each="p : ${produtos}"
+                        th:value="${p.id}"
+                        th:text="${p.nome}"></option>
+            </select>
+        </td>
+        <td>
+            <input type="number" class="form-control input-quantidade" min="1" value="1" required>
+        </td>
+        <td>
+            <input type="number" class="form-control input-valor-unitario" min="0.01" step="0.01" placeholder="0.00" required>
+        </td>
+        <td class="text-end fw-bold align-middle">
+            R$ <span class="texto-valor-total">0.00</span>
+        </td>
+        <td class="text-center">
+            <button type="button" class="btn btn-sm btn-outline-danger btn-remover-item" title="Remover item">
+                <i class="bi bi-trash3"></i>
+            </button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+
+        // Função 1: Adicionar uma nova linha de produto na tabela
+        $('#btnAdicionarItem').click(function() {
+            var novaLinha = $('#templateLinha').html();
+            $('#listaItens').append(novaLinha);
+            recalcularTotalNota(); // Recalcula caso haja alguma mudança
+        });
+
+        // Função 2: Remover uma linha (usando delegação de eventos para elementos gerados dinamicamente)
+        $('#listaItens').on('click', '.btn-remover-item', function() {
+            $(this).closest('tr').remove();
+            recalcularTotalNota();
+        });
+
+        // Função 3: Calcular o total da linha e da nota ao digitar quantidade ou valor
+        $('#listaItens').on('input', '.input-quantidade, .input-valor-unitario', function() {
+            var linha = $(this).closest('tr');
+            var quantidade = parseFloat(linha.find('.input-quantidade').val()) || 0;
+            var valorUnitario = parseFloat(linha.find('.input-valor-unitario').val()) || 0;
+
+            var totalLinha = quantidade * valorUnitario;
+            linha.find('.texto-valor-total').text(totalLinha.toFixed(2));
+
+            recalcularTotalNota();
+        });
+
+        // Função 4: Recalcular o grande total da Nota
+        function recalcularTotalNota() {
+            var totalNota = 0;
+            $('#listaItens .linha-item').each(function() {
+                var quantidade = parseFloat($(this).find('.input-quantidade').val()) || 0;
+                var valorUnitario = parseFloat($(this).find('.input-valor-unitario').val()) || 0;
+                totalNota += (quantidade * valorUnitario);
+            });
+            $('#valorTotalNota').text(totalNota.toFixed(2));
+        }
+
+        // Função 5: Enviar os dados via AJAX para o Spring Boot
+        $('#formNotaEntrada').submit(function(event) {
+            event.preventDefault(); // Impede o envio padrão do formulário
+            $('#alertaErro').addClass('d-none'); // Esconde erros anteriores
+
+            // Validação 1: Tem fornecedor?
+            var fornecedorId = $('#fornecedor').val();
+            if(!fornecedorId) {
+                mostrarErro("Por favor, selecione um Fornecedor.");
+                return;
+            }
+
+            // Validação 2: Tem itens na tabela?
+            var linhasItens = $('#listaItens .linha-item');
+            if(linhasItens.length === 0) {
+                mostrarErro("A nota precisa ter pelo menos um produto.");
+                return;
+            }
+
+            // Monta o Objeto JSON baseado no nosso Model Java
+            var nota = {
+                fornecedor: { id: fornecedorId },
+                itens: []
+            };
+
+            var temErroNosItens = false;
+
+            // Pega os dados de cada linha da tabela
+            linhasItens.each(function() {
+                var produtoId = $(this).find('.select-produto').val();
+                var quantidade = $(this).find('.input-quantidade').val();
+                var valorUnitario = $(this).find('.input-valor-unitario').val();
+
+                if(!produtoId || quantidade <= 0 || valorUnitario <= 0) {
+                    temErroNosItens = true;
+                }
+
+                nota.itens.push({
+                    produto: { id: produtoId },
+                    quantidade: parseInt(quantidade),
+                    valorUnitario: parseFloat(valorUnitario)
+                });
+            });
+
+            if(temErroNosItens) {
+                mostrarErro("Preencha todos os campos (Produto, Qtd e Valor) corretamente nos itens.");
+                return;
+            }
+
+            // Envia o JSON para o Controller via POST
+            $.ajax({
+                url: '/notas-entrada/salvar',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(nota),
+                success: function(response) {
+                    alert(response.sucesso); // Usando um alert simples, mas você pode usar Toast
+                    window.location.href = '/notas-entrada'; // Redireciona para a lista
+                },
+                error: function(xhr) {
+                    var mensagem = "Erro ao salvar a nota.";
+                    if(xhr.responseJSON && xhr.responseJSON.erro) {
+                        mensagem = xhr.responseJSON.erro;
+                    }
+                    mostrarErro(mensagem);
+                }
+            });
+        });
+
+        // Auxiliar para mostrar o alerta vermelho
+        function mostrarErro(mensagem) {
+            $('#alertaErro').text(mensagem).removeClass('d-none');
+            // Rola a tela para mostrar o erro (opcional)
+            $('html, body').animate({
+                scrollTop: $("#alertaErro").offset().top - 100
+            }, 500);
+        }
+
+        // Já inicia com uma linha em branco na tabela!
+        $('#btnAdicionarItem').click();
+    });
+</script>
+
+</body>
+</html>

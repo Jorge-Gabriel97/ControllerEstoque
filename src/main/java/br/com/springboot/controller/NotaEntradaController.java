@@ -10,14 +10,17 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@RestController
+@Controller //
 @RequestMapping("/notas-entrada")
 public class NotaEntradaController {
 
@@ -30,28 +33,29 @@ public class NotaEntradaController {
     @Autowired
     private FornecedorBo fornecedorBo;
 
+
     @GetMapping("/novo")
-    public ResponseEntity<Map<String, Object>> novo() {
-        Map<String, Object> model = new HashMap<>();
+    public ModelAndView novo() {
+        ModelMap model = new ModelMap();
 
-        // Envia uma nota vazia para ser preenchida
-        model.put("nota", new NotaEntrada());
-
-        // Envia listas de produtos e fornecedores ativos para preencher os selects
+        // Filtra e envia apenas produtos e fornecedores ativos para a tela
         List<Produto> produtosAtivos = produtoBo.lista().stream()
                 .filter(Produto::isAtivo)
                 .collect(Collectors.toList());
-        model.put("produtos", produtosAtivos);
+        model.addAttribute("produtos", produtosAtivos);
 
         List<Fornecedor> fornecedoresAtivos = fornecedorBo.lista().stream()
                 .filter(Fornecedor::isAtivo)
                 .collect(Collectors.toList());
-        model.put("fornecedores", fornecedoresAtivos);
+        model.addAttribute("fornecedores", fornecedoresAtivos);
 
-        return new ResponseEntity<>(model, HttpStatus.OK);
+
+        return new ModelAndView("notas-entrada/formulario", model);
     }
 
+
     @PostMapping("/salvar")
+    @ResponseBody
     public ResponseEntity<Map<String, Object>> salvar(@Valid @RequestBody NotaEntrada nota) {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -68,19 +72,11 @@ public class NotaEntradaController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<NotaEntrada>> lista() {
-        List<NotaEntrada> notas = bo.lista();
-        return new ResponseEntity<>(notas, HttpStatus.OK);
-    }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<NotaEntrada> pesquisaPeloId(@PathVariable("id") Long id) {
-        NotaEntrada nota = bo.pesquisaPeloId(id);
-        if (nota != null) {
-            return new ResponseEntity<>(nota, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    @GetMapping
+    public ModelAndView lista() {
+        ModelMap model = new ModelMap();
+        model.addAttribute("notas", bo.lista());
+        return new ModelAndView("notas-entrada/lista", model);
     }
 }
