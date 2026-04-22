@@ -30,9 +30,10 @@
                         <th>Fornecedor</th>
                         <th class="text-end">Valor Total</th>
                         <th class="text-center">Status</th>
-                    </tr>
+                        <th class="text-center">Ações</th> </tr>
                     </thead>
                     <tbody>
+
                     <tr th:each="nota : ${notas}">
                         <td class="text-center fw-bold text-secondary" th:text="${nota.id}">000</td>
 
@@ -46,6 +47,17 @@
 
                         <td class="text-center">
                             <span class="badge bg-success rounded-pill">Processada</span>
+                        </td>
+
+                        <td class="text-center">
+                            <a th:href="@{/notas-entrada/editar/{id}(id=${nota.id})}" class="btn btn-sm btn-outline-primary" title="Editar Nota">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <a th:href="@{/notas-entrada/remover/{id}(id=${nota.id})}" class="btn btn-sm btn-outline-danger ms-1"
+                               title="Remover Nota" onclick="return confirm('Tem certeza que deseja excluir esta nota e todos os seus itens?');">
+                                <i class="bi bi-trash3"></i>
+                            </a>
                         </td>
                     </tr>
                     </tbody>

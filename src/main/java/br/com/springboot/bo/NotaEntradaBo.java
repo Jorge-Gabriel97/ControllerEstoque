@@ -25,13 +25,34 @@ public class NotaEntradaBo {
 
     @Transactional
     public NotaEntrada salvar(NotaEntrada nota) {
-        // 1. Atribui a data/hora atual
-        nota.setDataHora(LocalDateTime.now());
 
+        // --- 1. REGRAS DE CABEÇALHO (NOVA NOTA vs EDIÇÃO) ---
+        if (nota.getId() == null) {
+            // Se não tem ID, é uma NOVA nota: Seta a data de agora
+            nota.setDataHora(LocalDateTime.now());
+
+            // Validação de Duplicidade (Mesmo fornecedor no mesmo dia)
+            boolean existeDuplicidade = dao.findAll().stream()
+                    .anyMatch(n ->
+                            n.getFornecedor().getId().equals(nota.getFornecedor().getId()) &&
+                                    n.getDataHora().toLocalDate().equals(nota.getDataHora().toLocalDate())
+                    );
+
+            if (existeDuplicidade) {
+                throw new RuntimeException("Atenção: Já existe uma nota registrada hoje para este fornecedor. Evite duplicidade.");
+            }
+        } else {
+            // Se tem ID, é EDIÇÃO: Precisamos resgatar a data original do banco para não perder
+            NotaEntrada notaAntiga = pesquisaPeloId(nota.getId());
+            if (notaAntiga != null) {
+                nota.setDataHora(notaAntiga.getDataHora());
+            }
+        }
+
+        // --- 2. CÁLCULO E VALIDAÇÃO DOS ITENS ---
         Float totalNota = 0f;
         List<NotaEntradaItem> itens = nota.getItens();
 
-        // 2. Itera sobre os itens da nota
         for (NotaEntradaItem item : itens) {
             // Garante o relacionamento bidirecional (item sabe qual é a nota dele)
             item.setNota(nota);
@@ -53,18 +74,17 @@ public class NotaEntradaBo {
                 throw new RuntimeException("Informe o produto em todos os itens da nota.");
             }
 
-            // 3. Calcula o valor total do item (quantidade * valorUnitario)
             Float valorTotalItem = item.getQuantidade() * item.getValorUnitario();
             item.setValorTotal(valorTotalItem);
 
-            // Soma ao total da nota
+            // Soma ao grande total da nota
             totalNota += valorTotalItem;
         }
 
-        // 4. Atribui o total da nota calculado
+        // 3. Atribui o total da nota recalculado com segurança
         nota.setTotal(totalNota);
 
-        // 5. Salva a nota (e seus itens) no banco
+        // 4. Salva a nota (e seus itens em cascata) no banco
         return dao.save(nota);
     }
 
@@ -74,5 +94,10 @@ public class NotaEntradaBo {
 
     public NotaEntrada pesquisaPeloId(Long id) {
         return dao.findById(id).orElse(null);
+    }
+
+    public void remove(NotaEntrada nota) {
+        // Correção: Agora ele realmente deleta a nota do banco!
+        dao.delete(nota);
     }
 }

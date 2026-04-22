@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Controller //
+@Controller
 @RequestMapping("/notas-entrada")
 public class NotaEntradaController {
 
@@ -38,6 +38,9 @@ public class NotaEntradaController {
     public ModelAndView novo() {
         ModelMap model = new ModelMap();
 
+        // Envia uma nota vazia para o Thymeleaf não dar erro ao buscar nota.id
+        model.addAttribute("nota", new NotaEntrada());
+
         // Filtra e envia apenas produtos e fornecedores ativos para a tela
         List<Produto> produtosAtivos = produtoBo.lista().stream()
                 .filter(Produto::isAtivo)
@@ -49,7 +52,6 @@ public class NotaEntradaController {
                 .collect(Collectors.toList());
         model.addAttribute("fornecedores", fornecedoresAtivos);
 
-
         return new ModelAndView("notas-entrada/formulario", model);
     }
 
@@ -60,7 +62,7 @@ public class NotaEntradaController {
         Map<String, Object> response = new HashMap<>();
         try {
             NotaEntrada notaSalva = bo.salvar(nota);
-            response.put("sucesso", "Nota de Entrada inserida com sucesso! ID: " + notaSalva.getId());
+            response.put("sucesso", "Nota de Entrada salva com sucesso! ID: " + notaSalva.getId());
             response.put("nota", notaSalva);
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (RuntimeException e) {
@@ -73,6 +75,29 @@ public class NotaEntradaController {
     }
 
 
+    @GetMapping("/editar/{id}")
+    public ModelAndView editar(@PathVariable("id") Long id) {
+        ModelMap model = new ModelMap();
+
+        // Busca a nota no banco e manda para a tela
+        model.addAttribute("nota", bo.pesquisaPeloId(id));
+
+        // Manda os selects de produtos e fornecedores
+        model.addAttribute("produtos", produtoBo.lista().stream().filter(Produto::isAtivo).collect(Collectors.toList()));
+        model.addAttribute("fornecedores", fornecedorBo.lista().stream().filter(Fornecedor::isAtivo).collect(Collectors.toList()));
+
+        return new ModelAndView("notas-entrada/formulario", model);
+    }
+
+    // --- REMOVE UMA NOTA INTEIRA ---
+    @GetMapping("/remover/{id}")
+    public String remover(@PathVariable("id") Long id) {
+        NotaEntrada nota = bo.pesquisaPeloId(id);
+        bo.remove(nota); // O Hibernate vai deletar a nota e, em cascata, todos os itens dela!
+        return "redirect:/notas-entrada";
+    }
+
+    // --- LISTA TODAS AS NOTAS ---
     @GetMapping
     public ModelAndView lista() {
         ModelMap model = new ModelMap();
