@@ -1,5 +1,6 @@
 package br.com.springboot.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Min;
@@ -23,10 +24,11 @@ public class NotaEntradaItem {
     private Float valorUnitario;
 
     @Column(nullable = false)
-    @NotNull(message = "Informe o valor unitário")
-    @Min(value = 0, message = "O valor unitário não pode ser negativo")
+    @NotNull(message = "Informe o valor total")
+    @Min(value = 0, message = "O valor total não pode ser negativo")
     private Float valorTotal;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nota_entrada_id", nullable = false)
     private NotaEntrada nota;

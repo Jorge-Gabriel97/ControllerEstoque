@@ -26,7 +26,7 @@ public class SecurityConfiguration {
     public UserDetailsService userDetailsService() {
         UserDetails admin = User.builder()
                 .username("admin")
-                .password(passwordEncoder().encode("12345"))
+                .password(passwordEncoder().encode("71991408285"))
                 .roles("Administrador")
                 .build();
 

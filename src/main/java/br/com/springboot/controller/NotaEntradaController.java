@@ -58,8 +58,19 @@ public class NotaEntradaController {
 
     @PostMapping("/salvar")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> salvar(@Valid @RequestBody NotaEntrada nota) {
+    public ResponseEntity<Map<String, Object>> salvar(@Valid @RequestBody NotaEntrada nota, org.springframework.validation.BindingResult result) {
         Map<String, Object> response = new HashMap<>();
+
+
+        if (result.hasErrors()) {
+            String erros = result.getFieldErrors().stream()
+                    .map(erro -> erro.getField() + " (" + erro.getDefaultMessage() + ")")
+                    .collect(Collectors.joining(", "));
+
+            response.put("erro", "Faltam dados: " + erros);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
         try {
             NotaEntrada notaSalva = bo.salvar(nota);
             response.put("sucesso", "Nota de Entrada salva com sucesso! ID: " + notaSalva.getId());
