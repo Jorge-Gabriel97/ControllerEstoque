@@ -1,70 +1,79 @@
 # 📦 ControllerEstoque
 
-> 🚧 **Status do Projeto:** Em desenvolvimento (WIP - Work in Progress) 🚧
+> Sistema de gerenciamento de estoque construído com arquitetura corporativa, segurança robusta e boas práticas de desenvolvimento.
 
-Um sistema de gerenciamento de estoque focado em facilitar o controle de entradas, saídas e monitoramento de produtos. Este projeto aplica padrões de arquitetura corporativa, segurança robusta e boas práticas de proteção de dados.
+![Java](https://img.shields.io/badge/Java-25-orange?style=flat-square&logo=java)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-brightgreen?style=flat-square&logo=springboot)
+![Spring Security](https://img.shields.io/badge/Spring%20Security-6-brightgreen?style=flat-square&logo=springsecurity)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?style=flat-square&logo=mysql)
+![Status](https://img.shields.io/badge/Status-Conclu%C3%ADdo-success?style=flat-square)
+
+---
 
 ## 🎯 Objetivo
-Prover uma solução eficiente para gestão de inventário, utilizando uma arquitetura desacoplada que facilita a manutenção e escalabilidade do sistema.
 
-## 🚀 Funcionalidades Implementadas
-- [x] **Segurança de Credenciais:** Uso de **Variáveis de Ambiente** para ocultar senhas de banco de dados e credenciais de ADMIN.
-- [x] **Segurança de Acesso:** Autenticação e Autorização com **Spring Security 6**.
-- [x] **Gestão de Clientes:** CRUD completo com validação de CPF, e-mail, máscaras de formatação (jQuery Mask) e controle de status (Ativo/Inativo).
-- [x] **Gestão de Fornecedores:** CRUD completo com validação de CNPJ e filtros de status.
-- [x] **Gestão de Produtos:** CRUD completo com controle de **Quantidade**, categorias via **Enum** e sincronização automática com o estoque.
-- [x] **Gestão de Estoque (ProdutoEstoque):** Entidade dedicada com regras de negócio para acréscimo e validação de estoque insuficiente.
-- [x] **Gestão de Notas de Entrada:** Lógica Mestre/Detalhe para entrada de mercadorias com itens dinâmicos.
-- [x] **Interface Dinâmica:** Adição de produtos em tempo real via **jQuery/AJAX** sem recarregar a página.
-- [x] **Componentização:** Navegação global via **Thymeleaf Fragments**.
-- [x] **Testes Automatizados:** Testes de integração para as camadas de negócio `ProdutoEstoqueBo` e `ProdutoBo` com **JUnit 5**.
+Prover uma solução eficiente para gestão de inventário, com arquitetura desacoplada (MVC + BO/DAO), controle de acesso via Spring Security, e interface responsiva com Thymeleaf e Bootstrap 5.
 
-## 📈 Progressão e Arquitetura
-O projeto segue a estrutura **MVC + BO/DAO**, garantindo que as regras de negócio fiquem isoladas da persistência:
+---
 
-- **Módulo de Clientes:** CRUD com `@CPF`, `@Email`, `@NotBlank` (Jakarta Validation) e feedback visual via Flash Attributes.
-- **Módulo de Produtos:** Ao salvar um novo produto, o `ProdutoBo` cria automaticamente um registro correspondente no `ProdutoEstoque`, mantendo os dois módulos sincronizados.
-- **Módulo de Movimentações:** `NotaEntrada` com relacionamento `@OneToMany` para `NotaEntradaItem`.
-- **Integração Híbrida:** `@Controller` para renderização via Thymeleaf e `@ResponseBody` com `ResponseEntity` para payloads JSON via AJAX.
-- **Segurança Profissional:** Credenciais migradas de "hardcoded" para variáveis de ambiente `${DB_USER}`, `${DB_PASS}`, garantindo que dados sensíveis não sejam versionados.
-- **Testes de Integração:** Testes com `@SpringBootTest` e `@Transactional` (rollback automático), cobrindo salvamento, pesquisa por ID, atualização de estoque e validação de regras de negócio.
+## ✅ Funcionalidades
 
-## 🐛 Erros Enfrentados e Soluções (Metodologia FTDF)
-Aplicando o **"Follow the Data Flow"**, resolvemos os seguintes desafios:
+### 🔐 Segurança
+- Autenticação e autorização com **Spring Security 6**
+- Credenciais protegidas via **variáveis de ambiente** (`${DB_USER}`, `${DB_PASS}`) — nenhuma senha versionada no repositório
 
-- **Data Truncation (Conflito de Tamanho de Coluna):**
-  - *Problema:* jQuery Mask enviava dados formatados (ex: 15 chars) mas o banco esperava 11 caracteres.
-  - *Solução:* Alinhamento de HTML (`maxlength`), Java (`@Column(length)`) e banco de dados (`ALTER TABLE`).
+### 👥 Gestão de Clientes
+- CRUD completo com validação de **CPF**, **e-mail** e campos obrigatórios (Jakarta Validation)
+- Máscaras de formatação via **jQuery Mask**
+- Controle de status **Ativo/Inativo**
 
-- **Detached entity passed to persist (Hibernate):**
-  - *Problema:* Erro ao editar registros existentes — o JPA tentava usar `persist` em entidade com ID já existente.
-  - *Solução:* Lógica condicional no DAO: `persist` para ID `null` (novo) e `merge` para ID existente (edição).
+### 🏭 Gestão de Fornecedores
+- CRUD completo com validação de **CNPJ**
+- Filtros por status
 
-- **Scale has no meaning for SQL floating point (Hibernate):**
-  - *Problema:* Erro ao mapear campos `Float` com `@Column(precision, scale)`.
-  - *Solução:* Remoção das propriedades de precisão/escala, incompatíveis com tipos de ponto flutuante aproximados no MySQL.
+### 📦 Gestão de Produtos
+- CRUD completo com controle de **quantidade** e categorias via **Enum**
+- Ao cadastrar um produto, registro correspondente em `ProdutoEstoque` é criado automaticamente
 
-- **Erro 404 - Template Not Found (Pluralização):**
-  - *Problema:* Controller não encontrava o HTML apesar do código correto.
-  - *Solução:* Correção da estrutura de pastas de `nota-entrada` para `notas-entrada`, alinhando o sistema de arquivos com o mapeamento de rotas.
+### 🏪 Gestão de Estoque
+- Entidade dedicada `ProdutoEstoque` com regras de negócio para acréscimo e validação de **estoque insuficiente**
 
-- **Redirecionamento Fantasma (Spring Security Cache):**
-  - *Problema:* Redirecionamento para URLs antigas mesmo após correções no código.
-  - *Solução:* Limpeza de cookies e cache do navegador para invalidar o `RequestCacheAwareFilter`.
+### 🧾 Notas de Entrada
+- Lançamento de mercadorias com modelo **Mestre/Detalhe** (`NotaEntrada` → `NotaEntradaItem`)
+- Adição de produtos em tempo real via **jQuery/AJAX** sem recarregar a página
 
-- **Produtos Não Listados no Cadastro de Nota:**
-  - *Problema:* Lista de produtos vazia no formulário de entrada.
-  - *Solução:* Produtos estavam com `ativo = 0` no banco. Implementado filtro no Controller para exibir apenas itens ativos.
+### 🧩 Interface
+- Navegação global com **Thymeleaf Fragments**
+- Layout responsivo com **Bootstrap 5.3**
+- Integração híbrida: `@Controller` para Thymeleaf + `@ResponseBody` / `ResponseEntity` para JSON via AJAX
 
-- **Testes falhando por variáveis de ambiente não resolvidas:**
-  - *Problema:* `@SpringBootTest` subia o contexto com `${DB_USER}` literal, causando `Access denied`.
-  - *Solução:* Credenciais fornecidas diretamente via `properties` na anotação `@SpringBootTest`.
+---
 
-- **ConstraintViolationException nos testes de integração:**
-  - *Problema:* Testes criavam objetos `ProdutoEstoque` sem preencher `descricao` e `preco`, campos obrigatórios pela validação da entidade.
-  - *Solução:* Preenchimento completo dos objetos nos testes, respeitando as constraints da entidade.
+## 🏗️ Arquitetura
 
-## 🛠️ Tecnologias Utilizadas
+\```
+Controller  →  BO (Business Object)  →  DAO  →  Banco de Dados
+                     ↑
+              Regras de Negócio
+              Validações
+              Orquestração
+\```
+
+A camada **BO** isola completamente as regras de negócio da persistência, garantindo coesão e testabilidade.
+
+---
+
+## 🧪 Testes
+
+Testes de integração com **JUnit 5** e **Spring Boot Test** cobrindo:
+
+- Salvamento e pesquisa por ID (`ProdutoBo`, `ProdutoEstoqueBo`)
+- Atualização de estoque e validação de regras de negócio
+- Rollback automático via `@Transactional` nos testes
+
+---
+
+## 🛠️ Tecnologias
 
 | Camada | Tecnologia |
 |---|---|
@@ -75,11 +84,63 @@ Aplicando o **"Follow the Data Flow"**, resolvemos os seguintes desafios:
 | Testes | JUnit 5, Spring Boot Test |
 | Build | Maven |
 
-## ⚙️ Como executar o projeto localmente
+---
 
-1. Clone este repositório:
-```bash
-   git clone https://github.com/Jorge-Gabriel97/ControllerEstoque.git
-```
+## ⚙️ Como executar localmente
 
-2. Configure as variáveis de ambiente no IntelliJ (Run > Edit Configurations > Environment Variables):
+### Pré-requisitos
+- Java 25+
+- Maven 3.9+
+- MySQL 8.0 rodando localmente
+
+### 1. Clone o repositório
+
+\```bash
+git clone https://github.com/Jorge-Gabriel97/ControllerEstoque.git
+cd ControllerEstoque
+\```
+
+### 2. Crie o banco de dados
+
+\```sql
+CREATE DATABASE estoque;
+\```
+
+### 3. Configure as variáveis de ambiente
+
+No IntelliJ: **Run > Edit Configurations > Environment Variables**
+
+\```
+DB_USER=seu_usuario
+DB_PASS=sua_senha
+ADMIN_USER=admin
+ADMIN_PASS=sua_senha_admin
+\```
+
+### 4. Execute o projeto
+
+\```bash
+./mvnw spring-boot:run
+\```
+
+Acesse: [http://localhost:8080](http://localhost:8080)
+
+---
+
+## 📁 Estrutura do Projeto
+
+\```
+src/main/java/br/com/springboot/
+├── controller/       # Camada MVC — recebe requisições HTTP
+├── bo/               # Business Objects — regras de negócio
+├── dao/              # Data Access Objects — persistência
+├── model/            # Entidades JPA
+├── repository/       # Spring Data JPA Repositories
+└── api/              # Endpoints REST (JSON via AJAX)
+\```
+
+---
+
+## 👨‍💻 Autor
+
+**Jorge Gabriel** — [@Jorge-Gabriel97](https://github.com/Jorge-Gabriel97)
