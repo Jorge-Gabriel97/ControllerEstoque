@@ -12,6 +12,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+// IMPORTANTE: Adicione este import manual para o withDefaults() funcionar
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -26,7 +28,7 @@ public class SecurityConfiguration {
     public UserDetailsService userDetailsService() {
         UserDetails admin = User.builder()
                 .username("admin")
-                .password(passwordEncoder().encode("71991408285"))
+                .password(passwordEncoder().encode("71991408285")) // Senha forte do Jorge!
                 .roles("Administrador")
                 .build();
 
@@ -42,24 +44,28 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                // 1. DESATIVA O CSRF APENAS PARA AS APIS (Permite POST/PUT/DELETE pelo Postman)
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
-
 
                         .requestMatchers(HttpMethod.GET, "/nota-entrada").hasRole("Administrador")
                         .requestMatchers(HttpMethod.GET, "/nota-saida").hasRole("Administrador")
                         .requestMatchers(HttpMethod.GET, "/estoque").hasRole("Administrador")
 
-
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                         .loginPage("/login")
+                        .loginPage("/login")
                         .defaultSuccessUrl("/", true)
                         .permitAll()
                 )
-                .logout(logout -> logout
 
+                // 2. ATIVA A AUTENTICAÇÃO BÁSICA (Abre as portas para a aba "Authorization" do Postman)
+                .httpBasic(withDefaults())
+
+                .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()

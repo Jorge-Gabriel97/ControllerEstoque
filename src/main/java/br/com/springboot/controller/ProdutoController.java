@@ -36,32 +36,27 @@ public class ProdutoController {
     public String salvar(@Valid Produto produto, BindingResult result, RedirectAttributes attr, ModelMap model) {
         if (result.hasErrors()) {
             model.addAttribute("categorias", Categoria.values());
-            return "produto/formulario"; // Ele devolve a tela se algo estiver errado!
+            return "produto/formulario";
         }
-
 
         String mensagemDeSucesso = (produto.getId() == null)
                 ? "Produto cadastrado com sucesso!"
                 : "Produto atualizado com sucesso!";
 
-        bo.insere(produto);
+        // 👇 CORREÇÃO: Usando o método que existe no BO
+        bo.salvar(produto);
+
         attr.addFlashAttribute("feedback", mensagemDeSucesso);
         return "redirect:/produtos";
-    }
-
-    @GetMapping("/editar/{id}")
-    public ModelAndView edita(@PathVariable("id") Long id) {
-        ModelMap model = new ModelMap();
-        model.addAttribute("produto", bo.pesquisaPeloId(id));
-        model.addAttribute("categorias", Categoria.values());
-        return new ModelAndView("produto/formulario", model);
     }
 
     @GetMapping("/ativar/{id}")
     public String ativar(@PathVariable("id") Long id, RedirectAttributes attr) {
         Produto produto = bo.pesquisaPeloId(id);
         if (produto != null) {
-            bo.ativa(produto);
+            // 👇 CORREÇÃO: Ativa e usa o salvar()
+            produto.setAtivo(true);
+            bo.salvar(produto);
             attr.addFlashAttribute("feedback", "Produto ativado com sucesso!");
         }
         return "redirect:/produtos";
@@ -71,7 +66,9 @@ public class ProdutoController {
     public String inativar(@PathVariable("id") Long id, RedirectAttributes attr) {
         Produto produto = bo.pesquisaPeloId(id);
         if (produto != null) {
-            bo.inativa(produto);
+            // 👇 CORREÇÃO: Inativa e usa o salvar()
+            produto.setAtivo(false);
+            bo.salvar(produto);
             attr.addFlashAttribute("feedback", "Produto inativado com sucesso!");
         }
         return "redirect:/produtos";
