@@ -14,10 +14,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(properties = {
         "ADMIN_USER=admin",
-        "ADMIN_PASS=teste123",
-        "DB_USER=seu_usuario",
-        "DB_PASS=sua_senha",
-        "DB_URL=jdbc:mysql://localhost:3306/seu_banco"
+        "ADMIN_PASS=71991408285",
+        "DB_USER=root",
+        "DB_PASS=wN90H;4eL{rj(ckP-D9",
+        "DB_URL=jdbc:mysql://localhost:3306/mySql"
 })
 @Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

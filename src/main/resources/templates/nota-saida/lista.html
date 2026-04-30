@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Notas de Saída</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-5">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>📋 Notas de Saída (Vendas)</h2>
+    <a th:href="@{/nota-saida/novo}" class="btn btn-primary">Nova Venda</a>
+</div>
+
+<!-- Feedback de Sucesso -->
+<div th:if="${feedback}" class="alert alert-success" th:text="${feedback}"></div>
+
+<table class="table table-striped table-hover">
+    <thead class="table-dark">
+    <tr>
+        <th>ID</th>
+        <th>Data/Hora</th>
+        <th>Total (R$)</th>
+        <th>Ações</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="n : ${notas}">
+        <td th:text="${n.id}"></td>
+        <td th:text="${#temporals.format(n.dataHora, 'dd/MM/yyyy HH:mm')}"></td>
+        <td th:text="${#numbers.formatCurrency(n.total)}"></td>
+        <td>
+            <a th:href="@{/nota-saida/editar/{id}(id=${n.id})}" class="btn btn-sm btn-warning">Ver/Editar</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<a th:href="@{/}" class="btn btn-secondary">Voltar ao Menu</a>
+
+</body>
+</html>
